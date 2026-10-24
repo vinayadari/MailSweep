@@ -23,6 +23,48 @@ model User {
 
   subscriptions   Subscription[]
   attempts        UnsubscribeAttempt[]
+  scanJobs        ScanJob[]
+  bulkJobs        BulkJob[]
+}
+
+model ScanJob {
+  id                  String    @id @default(cuid())
+  userId              String
+  status              String    @default("PENDING")   // PENDING | RUNNING | COMPLETED | FAILED | PARTIAL | INTERRUPTED
+  phase               String    @default("IDLE")      // IDLE | COLLECTING_IDS | FETCHING_METADATA | DETECTING | UPSERTING | COMPLETED
+
+  // Scan scope — frozen at creation so resume uses the same range
+  monthsBack          Int       @default(6)
+  scanAfterEpoch      Int                             // Unix seconds for the "after:" query, computed once at creation
+
+  // Progress counters
+  totalMessages       Int       @default(0)
+  processedMessages   Int       @default(0)
+  totalSenders        Int       @default(0)
+  processedSenders    Int       @default(0)
+  subscriptionsFound  Int       @default(0)
+
+  // Phase 1 checkpoint: collected message IDs + pagination cursor
+  collectedMessageIds String[]  @default([])
+  lastPageToken       String?
+  pagesCollected      Int       @default(0)
+
+  // Phase 2 checkpoint: metadata chunk progress
+  metadataChunksProcessed Int   @default(0)
+
+  // Timing & heartbeat
+  startedAt           DateTime  @default(now())
+  completedAt         DateTime?
+  lastHeartbeatAt     DateTime  @default(now())
+
+  // Error tracking
+  errorMessage        String?
+  errorCode           String?
+
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, startedAt])
 }
 
 model Subscription {
@@ -38,10 +80,11 @@ model Subscription {
   firstSeen       DateTime?
   lastSeen        DateTime?
 
-  unsubscribeUrl  String?
-  unsubscribeType String    @default("none") // one_click | url | mailto | none
-  subscriptionScore Int     @default(0)
-  confidence      Int       @default(0)
+  unsubscribeUrl    String?
+  unsubscribeMailto String?
+  unsubscribeType   String    @default("none") // one_click | url | mailto | none
+  subscriptionScore Int       @default(0)
+  confidence        Int       @default(0)
 
   // Store message IDs for trash operation (max ~500)
   messageIds      String[]  @default([])
@@ -55,6 +98,7 @@ model Subscription {
 
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   attempts        UnsubscribeAttempt[]
+  bulkJobItems    BulkJobItem[]
 
   @@unique([userId, senderEmail])
   @@index([userId, status])
@@ -83,4 +127,41 @@ model UnsubscribeAttempt {
 
   @@index([userId, attemptedAt])
   @@index([subscriptionId, attemptedAt])
+}
+
+model BulkJob {
+  id              String    @id @default(cuid())
+  userId          String
+  type            String    @default("UNSUBSCRIBE") // UNSUBSCRIBE | TRASH
+  status          String    @default("PENDING")     // PENDING | RUNNING | COMPLETED | PARTIAL | FAILED
+
+  totalItems      Int       @default(0)
+  completedItems  Int       @default(0)
+  failedItems     Int       @default(0)
+  pendingManual   Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           BulkJobItem[]
+
+  @@index([userId, createdAt])
+}
+
+model BulkJobItem {
+  id              String    @id @default(cuid())
+  bulkJobId       String
+  subscriptionId  String
+  status          String    @default("PENDING") // PENDING | SUCCESS | FAILED | PENDING_MANUAL | SKIPPED
+  attemptId       String?   // FK to UnsubscribeAttempt
+
+  processedAt     DateTime?
+  errorMessage    String?
+
+  bulkJob         BulkJob      @relation(fields: [bulkJobId], references: [id], onDelete: Cascade)
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([bulkJobId, subscriptionId])
+  @@index([bulkJobId, status])
 }

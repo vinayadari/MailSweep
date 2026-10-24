@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getGmailClient } from "@/lib/gmail";
+import { getGmailForUser } from "@/lib/gmail";
 
 // GET /api/subscriptions/[id]
 export async function GET(request, { params }) {
@@ -24,7 +24,7 @@ export async function GET(request, { params }) {
   // Fetch recent messages for this sender from Gmail
   let recentMessages = [];
   try {
-    const gmail = getGmailClient(user.accessToken, user.refreshToken);
+    const gmail = await getGmailForUser(user.userId);
     const listRes = await gmail.users.messages.list({
       userId: "me",
       q: `from:${sub.senderEmail}`,

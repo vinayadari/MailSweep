@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#0b0e17"/>
+  <rect width="32" height="32" rx="8" stroke="rgba(99, 102, 241, 0.4)" stroke-width="1.5"/>
+  <defs>
+    <linearGradient id="ms-cyan-indigo" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <linearGradient id="ms-wing" x1="14" y1="8" x2="28" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <path d="M4 9C4 7.89543 4.89543 7 6 7H20C21.1046 7 22 7.89543 22 9V21C22 22.1046 21.1046 23 20 23H6C4.89543 23 4 22.1046 4 21V9Z" stroke="url(#ms-cyan-indigo)" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M4 8.5L12 15L15 12.5" stroke="url(#ms-cyan-indigo)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M13.5 22.5C13.5 22.5 15.5 15.5 21.5 11C24.5 8.75 28 6.5 28 6.5C28 6.5 26.5 10.5 23 13.5C20.5 15.6 17.5 17.5 17 22" stroke="url(#ms-wing)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(56, 189, 248, 0.2)"/>
+  <path d="M20 12.5C22.2 10.8 24.5 9.5 25.5 8.5" stroke="#e0f2fe" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

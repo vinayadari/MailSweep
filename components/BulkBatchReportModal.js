@@ -8,7 +8,16 @@ export function BulkBatchReportModal({ report, onClose, onRetryFailed, retrying 
 
   if (!report) return null;
 
-  const { summary, receipts } = report;
+  const receipts = report.receipts || [];
+  // Normalize: API returns report.stats; fall back gracefully if summary key exists (legacy)
+  const stats = report.stats || report.summary || {};
+  const summary = {
+    total:              stats.total              ?? receipts.length,
+    acceptedCount:      stats.accepted           ?? stats.acceptedCount      ?? 0,
+    pendingManualCount: stats.pendingManual       ?? stats.pendingManualCount ?? 0,
+    failedCount:        stats.failed             ?? stats.failedCount        ?? 0,
+    trashTotal:         stats.trashedEmails       ?? stats.trashTotal         ?? 0,
+  };
   const failedReceipts = receipts.filter((r) => r.status === "FAILED");
 
   return (

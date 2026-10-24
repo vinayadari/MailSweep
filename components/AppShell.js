@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import MailSweepLogo from "@/components/MailSweepLogo";
 
 const NAV_ITEMS = [
   {
@@ -48,6 +50,7 @@ export function AppShell({ children }) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ["me"],
@@ -82,51 +85,10 @@ export function AppShell({ children }) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
               textDecoration: "none",
             }}
           >
-            <div
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "12px",
-                background: "var(--accent-gradient)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                boxShadow: "0 0 20px -2px rgba(99, 102, 241, 0.5)",
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M3 8L12 13L21 8" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                <rect x="3" y="6" width="18" height="13" rx="2" stroke="white" strokeWidth="2.2" />
-              </svg>
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: "17px",
-                  fontFamily: "var(--font-display)",
-                  fontWeight: "800",
-                  color: "var(--text-primary)",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.1,
-                }}
-              >
-                MailClean
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "var(--text-muted)",
-                  fontWeight: "500",
-                }}
-              >
-                Inbox Manager
-              </div>
-            </div>
+            <MailSweepLogo size="md" subtitle="INBOX CLEANER" />
           </Link>
         </div>
 
@@ -244,16 +206,20 @@ export function AppShell({ children }) {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px", overflow: "hidden" }}>
-              {user?.picture ? (
-                <img
+              {user?.picture && !imgError ? (
+                <Image
                   src={user.picture}
                   alt={user.name || "User"}
+                  width={32}
+                  height={32}
+                  unoptimized
+                  referrerPolicy="no-referrer"
+                  onError={() => setImgError(true)}
                   style={{
-                    width: "32px",
-                    height: "32px",
                     borderRadius: "50%",
                     objectFit: "cover",
                     border: "1px solid var(--border-light)",
+                    flexShrink: 0,
                   }}
                 />
               ) : (
@@ -269,6 +235,7 @@ export function AppShell({ children }) {
                     fontWeight: "700",
                     fontSize: "13px",
                     color: "white",
+                    flexShrink: 0,
                   }}
                 >
                   {user?.name?.[0] || "U"}

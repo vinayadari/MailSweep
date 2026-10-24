@@ -1,7 +1,8 @@
+import Image from "next/image";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata = {
-  title: "Settings — MailClean",
+  title: "Settings — MailSweep",
 };
 
 export default async function SettingsPage() {
@@ -34,16 +35,19 @@ export default async function SettingsPage() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {user?.picture ? (
-            <img
+            <Image
               src={user.picture}
               alt={user.name || "User"}
+              width={56}
+              height={56}
+              unoptimized
+              referrerPolicy="no-referrer"
               style={{
-                width: "56px",
-                height: "56px",
                 borderRadius: "50%",
                 objectFit: "cover",
                 border: "2px solid var(--border-light)",
                 boxShadow: "0 0 16px rgba(0,0,0,0.4)",
+                flexShrink: 0,
               }}
             />
           ) : (
@@ -83,7 +87,7 @@ export default async function SettingsPage() {
           {[
             {
               title: "Zero Email Body Access",
-              desc: "MailClean only requests header metadata. We never inspect or store message bodies.",
+              desc: "MailSweep only requests header metadata. We never inspect or store message bodies.",
               icon: "🛡️",
             },
             {
@@ -138,7 +142,7 @@ export default async function SettingsPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "20px", flexWrap: "wrap" }}>
           <div>
             <div style={{ fontWeight: "700", color: "var(--text-primary)", fontSize: "14px", marginBottom: "2px" }}>
-              Sign Out of MailClean
+              Sign Out of MailSweep
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
               Terminates your current session and clears cached auth cookies.

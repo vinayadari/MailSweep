@@ -1,4 +1,4 @@
-# 📧 MailClean — Gmail Subscription Manager
+# 📧 MailSweep — Gmail Subscription Manager
 
 A modern, fast, and privacy-focused web application to connect your Gmail, automatically detect subscription senders and newsletters, browse them, inspect recent emails, unsubscribe in 1-click, and optionally batch trash existing promotional emails.
 
@@ -93,4 +93,4 @@ npx prisma migrate dev
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view MailClean.
+Open [http://localhost:3000](http://localhost:3000) to view MailSweep.

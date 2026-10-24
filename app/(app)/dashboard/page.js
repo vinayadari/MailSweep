@@ -87,8 +87,109 @@ function StatCard({ label, value, sub, icon, gradient, change }) {
   );
 }
 
-function ScanProgressBar({ status, onDismiss }) {
-  if (!status || status.state === "idle" || status.state === "complete") return null;
+function ScanProgressBar({ status, onDismiss, onResume, isResuming, dismissedId }) {
+  if (!status || status.state === "idle") return null;
+  if (status.state === "complete" && status.jobId === dismissedId) return null;
+
+  if (status.state === "complete") {
+    return (
+      <div
+        className="glass-card animate-fade-in"
+        style={{
+          padding: "20px 24px",
+          marginBottom: "32px",
+          borderRadius: "16px",
+          border: "1px solid rgba(16, 185, 129, 0.4)",
+          background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(14, 17, 26, 0.95) 100%)",
+          boxShadow: "0 0 32px -4px rgba(16, 185, 129, 0.25)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "10px",
+                background: "rgba(16, 185, 129, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "20px",
+              }}
+            >
+              ✨
+            </div>
+            <div>
+              <div style={{ fontSize: "15px", fontWeight: "700", color: "#6ee7b7", marginBottom: "2px" }}>
+                Inbox Scan Complete!
+              </div>
+              <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                Scanned <strong>{status.totalMessages?.toLocaleString() || "all"} emails</strong> and discovered <strong>{status.subscriptionsFound || 0} newsletter mailing lists</strong>.
+              </div>
+            </div>
+          </div>
+          {onDismiss && (
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={onDismiss}
+              style={{ borderRadius: "8px" }}
+            >
+              Dismiss
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (status.state === "interrupted") {
+    return (
+      <div
+        className="glass-card animate-fade-in"
+        style={{
+          padding: "24px 28px",
+          marginBottom: "32px",
+          borderRadius: "16px",
+          border: "1px solid rgba(245, 158, 11, 0.4)",
+          background: "linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(14, 17, 26, 0.95) 100%)",
+          boxShadow: "0 0 32px -4px rgba(245, 158, 11, 0.25)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+          <span style={{ fontSize: "28px", lineHeight: 1 }}>⏸️</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: "16px", fontWeight: "800", color: "#fcd34d", marginBottom: "6px" }}>
+              Scan Interrupted — Checkpoint Saved
+            </div>
+            <p style={{ fontSize: "13.5px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "16px" }}>
+              {status.error || "The previous inbox scan was interrupted. Your progress was safely saved to the database. You can resume directly from the saved checkpoint."}
+            </p>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={onResume}
+                disabled={isResuming}
+                style={{ borderRadius: "8px" }}
+              >
+                {isResuming ? "Resuming..." : "⚡ Resume Scan"}
+              </button>
+              {onDismiss && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={onDismiss}
+                  style={{ borderRadius: "8px" }}
+                >
+                  Dismiss
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (status.state === "error") {
     const isApiDisabled =
@@ -149,21 +250,43 @@ function ScanProgressBar({ status, onDismiss }) {
     );
   }
 
-  const progress = status.total ? Math.round((status.progress / status.total) * 100) : 15;
-  const phaseLabels = {
-    collecting: "Discovering message headers in Gmail...",
-    fetching_metadata: "Analyzing sender metadata & unsubscribe tags...",
-    detecting_subscriptions: "Categorizing newsletters & scoring lists...",
+  const total = Number(status.total) || 0;
+  const current = Number(status.progress) || 0;
+  const progressPercent = total > 0 ? Math.min(100, Math.max(3, Math.round((current / total) * 100))) : 12;
+
+  const phaseConfig = {
+    collecting: {
+      badge: "Phase 1: Discovery",
+      title: "Discovering email headers in Gmail...",
+      sub: "Retrieving message IDs and timestamps across your inbox",
+      icon: "🔍",
+    },
+    fetching_metadata: {
+      badge: "Phase 2: Analysis",
+      title: "Analyzing sender metadata & unsubscribe tags...",
+      sub: "Inspecting List-Unsubscribe headers, bounce loops & RFC 8058 tags",
+      icon: "⚡",
+    },
+    detecting_subscriptions: {
+      badge: "Phase 3: Indexing",
+      title: "Categorizing newsletters & scoring lists...",
+      sub: "Grouping senders and calculating newsletter confidence scores",
+      icon: "📊",
+    },
   };
+
+  const phase = phaseConfig[status.phase] || phaseConfig.collecting;
 
   return (
     <div
       className="glass-card animate-fade-in"
       style={{
-        padding: "24px",
+        padding: "24px 28px",
         marginBottom: "32px",
-        border: "1px solid rgba(99, 102, 241, 0.35)",
-        boxShadow: "0 0 32px -4px rgba(99, 102, 241, 0.25)",
+        border: "1px solid rgba(99, 102, 241, 0.4)",
+        background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(14, 17, 26, 0.95) 100%)",
+        boxShadow: "0 0 36px -4px rgba(99, 102, 241, 0.28)",
+        borderRadius: "18px",
       }}
     >
       <div
@@ -171,58 +294,92 @@ function ScanProgressBar({ status, onDismiss }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "14px",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              width: "10px",
-              height: "10px",
-              borderRadius: "50%",
-              background: "var(--accent-light)",
-              boxShadow: "0 0 10px var(--accent)",
-            }}
-          />
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ position: "relative", width: "14px", height: "14px", flexShrink: 0 }}>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                background: "var(--accent-light)",
+                animation: "pulseGlow 1.5s ease-in-out infinite",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: "2px",
+                borderRadius: "50%",
+                background: "var(--accent)",
+              }}
+            />
+          </div>
+
           <div>
-            <div style={{ fontWeight: "700", color: "var(--text-primary)", fontSize: "14px" }}>
-              {phaseLabels[status.phase] || "Inbox scan in progress..."}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+              <span className="badge badge-indigo" style={{ fontSize: "10.5px", padding: "2px 8px" }}>
+                {phase.badge}
+              </span>
+              <span style={{ fontWeight: "700", color: "var(--text-primary)", fontSize: "14px" }}>
+                {phase.title}
+              </span>
             </div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-              Running safely in background without blocking
+              {phase.sub}
             </div>
           </div>
         </div>
 
-        <div style={{ textAlign: "right" }}>
-          <span style={{ fontWeight: "800", color: "var(--accent-light)", fontSize: "16px" }}>
-            {progress}%
-          </span>
-          {status.total && (
-            <div style={{ color: "var(--text-muted)", fontSize: "11px" }}>
-              {status.progress?.toLocaleString()} / {status.total?.toLocaleString()}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontWeight: "800", color: "var(--accent-light)", fontSize: "18px", fontFamily: "var(--font-display)" }}>
+              {progressPercent}%
             </div>
+            <div style={{ color: "var(--text-muted)", fontSize: "11px", fontWeight: "500" }}>
+              {total > 0
+                ? `${current.toLocaleString()} / ${total.toLocaleString()} emails`
+                : "Scanning index..."}
+            </div>
+          </div>
+
+          {onDismiss && (
+            <button
+              onClick={onDismiss}
+              className="btn btn-ghost btn-sm"
+              title="Cancel current scan"
+              style={{ fontSize: "12px", color: "var(--text-muted)", padding: "4px 8px", borderRadius: "6px" }}
+            >
+              Cancel
+            </button>
           )}
         </div>
       </div>
 
+      {/* Progress Track */}
       <div
         style={{
-          height: "8px",
+          height: "10px",
           borderRadius: "999px",
           background: "var(--surface-elevated)",
           overflow: "hidden",
           border: "1px solid var(--border)",
+          position: "relative",
         }}
       >
         <div
+          className="progress-striped"
           style={{
             height: "100%",
-            width: `${Math.max(progress, 5)}%`,
-            background: "var(--accent-gradient)",
+            width: `${progressPercent}%`,
+            background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #38bdf8 100%)",
             borderRadius: "999px",
-            transition: "width 0.4s ease",
-            boxShadow: "0 0 12px var(--accent)",
+            transition: "width 0.35s ease",
+            boxShadow: "0 0 16px rgba(99, 102, 241, 0.5)",
           }}
         />
       </div>
@@ -233,6 +390,7 @@ function ScanProgressBar({ status, onDismiss }) {
 export default function DashboardPage() {
   const queryClient = useQueryClient();
   const [scanMonths, setScanMonths] = useState(6);
+  const [dismissedCompleteId, setDismissedCompleteId] = useState(null);
 
   // Queries
   const { data: user } = useQuery({
@@ -250,9 +408,17 @@ export default function DashboardPage() {
     queryFn: () => fetch("/api/scan").then((r) => r.json()),
     refetchInterval: (query) => {
       const state = query.state.data?.state;
-      return state === "running" ? 1500 : false;
+      return state === "running" ? 1200 : false;
     },
   });
+
+  // Automatically refresh subscriptions list when a scan finishes
+  useEffect(() => {
+    if (scanStatus?.state === "complete") {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    }
+  }, [scanStatus?.state, queryClient]);
 
   // Start scan mutation
   const scanMutation = useMutation({
@@ -274,7 +440,14 @@ export default function DashboardPage() {
     },
   });
 
-  const isScanning = scanStatus?.state === "running" || scanMutation.isPending;
+  const resumeMutation = useMutation({
+    mutationFn: () => fetch("/api/scan/resume", { method: "POST" }).then((r) => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["scan-status"] });
+    },
+  });
+
+  const isScanning = scanStatus?.state === "running" || scanMutation.isPending || resumeMutation.isPending;
 
   // Compute metrics
   const subs = subsData?.subscriptions || [];
@@ -310,8 +483,12 @@ export default function DashboardPage() {
 
         <div style={{ position: "relative", zIndex: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-            <span className="badge badge-indigo">Inbox Cleanliness 94%</span>
-            <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>• Cleaned in real-time</span>
+            <span className="badge badge-indigo">
+              {subs.length === 0 ? "Inbox Ready to Scan" : `Inbox Cleanliness ${Math.round((unsubs.length / subs.length) * 100)}%`}
+            </span>
+            <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+              {subs.length === 0 ? "• Start a scan below to analyze newsletters" : `• ${unsubs.length} of ${subs.length} lists cleaned`}
+            </span>
           </div>
 
           <h1
@@ -327,7 +504,7 @@ export default function DashboardPage() {
             Welcome back, {user?.name?.split(" ")[0] || "Friend"} 👋
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "15px", maxWidth: "560px", lineHeight: "1.6" }}>
-            MailClean has detected <strong style={{ color: "var(--text-primary)" }}>{subs.length} mailing lists</strong> across your inbox. Scan for new newsletters anytime or manage your subscriptions below.
+            MailSweep has detected <strong style={{ color: "var(--text-primary)" }}>{subs.length} mailing lists</strong> across your inbox. Scan for new newsletters anytime or manage your subscriptions below.
           </p>
         </div>
       </div>
@@ -335,7 +512,16 @@ export default function DashboardPage() {
       {/* Progress Bar & Error Card */}
       <ScanProgressBar
         status={scanStatus}
-        onDismiss={() => dismissErrorMutation.mutate()}
+        dismissedId={dismissedCompleteId}
+        onDismiss={() => {
+          if (scanStatus?.state === "complete") {
+            setDismissedCompleteId(scanStatus.jobId);
+          } else {
+            dismissErrorMutation.mutate();
+          }
+        }}
+        onResume={() => resumeMutation.mutate()}
+        isResuming={resumeMutation.isPending}
       />
 
       {/* Stat Cards Grid */}

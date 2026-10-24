@@ -1,37 +1,30 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getGmailClient, trashMessages, oneClickUnsubscribe } from "@/lib/gmail";
-import { UNSUBSCRIBE_TYPES } from "@/lib/subscription-detector";
+import { getGmailForUser } from "@/lib/gmail";
+import { executeTrash } from "@/lib/trash-executor";
 
 export async function POST(request, { params }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json().catch(() => ({}));
-  const trashExisting = body.trashExisting ?? false;
-
   const resolvedParams = await params;
-  const sub = await prisma.subscription.findFirst({
-    where: { id: resolvedParams.id, userId: user.userId },
-  });
+  const gmail = await getGmailForUser(user.userId).catch(() => null);
+  if (!gmail) return NextResponse.json({ error: "Gmail not connected. Please sign in again." }, { status: 401 });
 
-  if (!sub) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  try {
+    const result = await executeTrash({
+      userId: user.userId,
+      subscriptionId: resolvedParams.id,
+      gmailClient: gmail,
+    });
 
-  const gmail = getGmailClient(user.accessToken, user.refreshToken);
-
-  let trashCount = 0;
-  if (trashExisting && sub.messageIds?.length) {
-    try {
-      const r = await trashMessages(gmail, sub.messageIds);
-      trashCount = r.succeeded;
-    } catch {}
+    return NextResponse.json({
+      success: result.success,
+      trashCount: result.trashedCount,
+      failedCount: result.failedCount,
+      remainingCount: result.remainingCount,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
-
-  await prisma.subscription.update({
-    where: { id: sub.id },
-    data: { status: "ACTIVE" },
-  });
-
-  return NextResponse.json({ success: true, trashCount });
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getGmailClient } from "@/lib/gmail";
+import { getGmailForUser } from "@/lib/gmail";
 import { executeUnsubscribe } from "@/lib/unsubscribe-executor";
 
 export async function POST(request, { params }) {
@@ -10,6 +10,7 @@ export async function POST(request, { params }) {
 
   const body = await request.json().catch(() => ({}));
   const trashExisting = body.trashExisting ?? false;
+  const consentGiven = body.consentGiven ?? true;
 
   const resolvedParams = await params;
   const sub = await prisma.subscription.findFirst({
@@ -20,13 +21,14 @@ export async function POST(request, { params }) {
 
   let gmailClient = null;
   if (trashExisting && sub.messageIds?.length) {
-    gmailClient = getGmailClient(user.accessToken, user.refreshToken);
+    gmailClient = await getGmailForUser(user.userId);
   }
 
   // Execute safe, evidence-driven unsubscription & record audit receipt
   const receipt = await executeUnsubscribe({
     user,
     subscription: sub,
+    consentGiven,
     trashExisting,
     gmailClient,
   });

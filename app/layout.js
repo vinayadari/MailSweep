@@ -15,11 +15,12 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "MailClean — Clean Your Inbox & Bulk Unsubscribe",
+  title: "MailSweep — Clean Your Inbox & Bulk Unsubscribe",
   description:
-    "Connect Gmail securely, detect unwanted newsletters automatically, and 1-click unsubscribe in bulk.",
+    "Connect Gmail securely, detect unwanted newsletters automatically, and 1-click unsubscribe in bulk with MailSweep.",
+  referrer: "no-referrer-when-downgrade",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
   },
 };
 

@@ -7,6 +7,7 @@ import { EvidenceReceiptModal } from "@/components/EvidenceReceiptModal";
 import { BulkBatchReportModal } from "@/components/BulkBatchReportModal";
 
 const SORT_OPTIONS = [
+  { value: "relevance", label: "🎯 Best Match (Elastic FTS)" },
   { value: "messages", label: "Most emails" },
   { value: "newest", label: "Recently active" },
   { value: "oldest", label: "Oldest subscription" },
@@ -18,6 +19,7 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
     one_click: { badgeClass: "badge-emerald", label: "⚡ 1-Click Header" },
     url: { badgeClass: "badge-indigo", label: "🌐 Web Link" },
     mailto: { badgeClass: "badge-amber", label: "✉️ Mailto" },
+    body_link: { badgeClass: "badge-rose", label: "🔗 Body Link" },
     none: { badgeClass: "badge-muted", label: "Manual" },
   };
   const badgeInfo = typeBadges[sub.unsubscribeType] || typeBadges.none;
@@ -235,7 +237,7 @@ function UnsubscribeModal({ targets, onClose, onConfirm, loading }) {
 
         <p style={{ color: "var(--text-secondary)", fontSize: "13.5px", marginBottom: "20px", lineHeight: "1.6" }}>
           {isBulk && items.length > 1
-            ? "MailClean will validate destinations, execute RFC 8058 standard POST requests, and issue an evidence receipt for every sender."
+            ? "MailSweep will validate destinations, execute RFC 8058 standard POST requests, and issue an evidence receipt for every sender."
             : "We will validate the unsubscription endpoint, execute the standard RFC request, and issue a cryptographic evidence receipt."}
         </p>
 
@@ -325,6 +327,15 @@ export default function SubscriptionsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [unsubscribeTarget, setUnsubscribeTarget] = useState(null);
+
+  function handleSearchChange(val) {
+    setSearch(val);
+    if (val.trim() && sort === "messages") {
+      setSort("relevance");
+    } else if (!val.trim() && sort === "relevance") {
+      setSort("messages");
+    }
+  }
 
   // Evidence Modals
   const [batchReport, setBatchReport] = useState(null);
@@ -467,7 +478,7 @@ export default function SubscriptionsPage() {
           borderRadius: "14px",
         }}
       >
-        <div style={{ position: "relative", flex: "1", minWidth: "220px" }}>
+        <div style={{ position: "relative", flex: "1", minWidth: "240px" }}>
           <span
             style={{
               position: "absolute",
@@ -476,6 +487,7 @@ export default function SubscriptionsPage() {
               transform: "translateY(-50%)",
               color: "var(--text-muted)",
               fontSize: "14px",
+              pointerEvents: "none",
             }}
           >
             🔍
@@ -483,11 +495,48 @@ export default function SubscriptionsPage() {
           <input
             id="search-subscriptions"
             className="input"
-            placeholder="Search by sender name or email..."
+            placeholder="Search by sender, domain, or keyword (typo-tolerant)..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ paddingLeft: "40px", borderRadius: "10px" }}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            style={{
+              paddingLeft: "40px",
+              paddingRight: search ? "96px" : "14px",
+              borderRadius: "10px",
+              width: "100%",
+            }}
           />
+          {search && (
+            <div
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <span className="badge badge-indigo" style={{ fontSize: "10px", padding: "2px 6px" }}>
+                ⚡ FTS
+              </span>
+              <button
+                onClick={() => handleSearchChange("")}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  lineHeight: 1,
+                  padding: "4px",
+                }}
+                title="Clear search"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         <select

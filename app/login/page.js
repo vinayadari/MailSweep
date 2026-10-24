@@ -1,10 +1,11 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import MailSweepLogo from "@/components/MailSweepLogo";
 
 export const metadata = {
-  title: "Sign In — MailClean",
-  description: "Connect your Gmail account to detect and unsubscribe from mailing lists automatically.",
+  title: "Sign In — MailSweep",
+  description: "Connect your Gmail account to detect and unsubscribe from mailing lists automatically with MailSweep.",
 };
 
 export default async function LoginPage({ searchParams }) {
@@ -72,6 +73,13 @@ export default async function LoginPage({ searchParams }) {
         >
           {/* Left Column: Visual Showcase & Value Prop */}
           <div style={{ padding: "16px 24px" }}>
+            {/* Brand Logo */}
+            <div style={{ marginBottom: "28px" }}>
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <MailSweepLogo size="lg" subtitle="VERIFIED INBOX CLEANER" />
+              </Link>
+            </div>
+
             {/* Live Status Pill */}
             <div
               style={{
@@ -138,7 +146,7 @@ export default async function LoginPage({ searchParams }) {
                 maxWidth: "440px",
               }}
             >
-              MailClean scans your Gmail headers to surface unwanted subscriptions and spam newsletters. Unsubscribe and clean up your storage in seconds.
+              MailSweep scans your Gmail headers to surface unwanted subscriptions and spam newsletters. Unsubscribe and clean up your storage in seconds.
             </p>
 
             {/* Interactive Preview Simulation Card */}
@@ -256,33 +264,11 @@ export default async function LoginPage({ searchParams }) {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "60px",
-                    height: "60px",
-                    borderRadius: "18px",
-                    background: "var(--accent-gradient)",
                     marginBottom: "16px",
-                    boxShadow: "0 0 32px -4px rgba(99, 102, 241, 0.6)",
                     textDecoration: "none",
                   }}
                 >
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M3 8L12 13L21 8"
-                      stroke="white"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <rect
-                      x="3"
-                      y="6"
-                      width="18"
-                      height="13"
-                      rx="2.5"
-                      stroke="white"
-                      strokeWidth="2.2"
-                    />
-                  </svg>
+                  <MailSweepLogo size="xl" showText={false} />
                 </Link>
 
                 <h2
