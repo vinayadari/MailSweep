@@ -187,7 +187,7 @@ export default function SubscriptionDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: "36px", maxWidth: "800px", margin: "0 auto" }}>
+      <div className="app-page" style={{ padding: "36px", maxWidth: "800px", margin: "0 auto" }}>
         <div className="skeleton" style={{ height: "180px", borderRadius: "16px", marginBottom: "20px" }} />
         <div className="skeleton" style={{ height: "360px", borderRadius: "16px" }} />
       </div>
@@ -214,7 +214,7 @@ export default function SubscriptionDetailPage() {
   const avatarColor = colors[charCode % colors.length];
 
   return (
-    <div style={{ padding: "32px 36px", maxWidth: "880px", margin: "0 auto" }}>
+      <div className="app-page" style={{ padding: "32px 36px", maxWidth: "880px", margin: "0 auto" }}>
       {/* Breadcrumb */}
       <div style={{ marginBottom: "20px" }}>
         <Link

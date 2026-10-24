@@ -41,7 +41,7 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
 
   return (
     <div
-      className="card animate-fade-in"
+      className="subscription-card card animate-fade-in"
       style={{
         padding: "16px 20px",
         display: "flex",
@@ -98,7 +98,7 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
       </div>
 
       {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="subscription-card-info" style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px", flexWrap: "wrap" }}>
           <span
             style={{
@@ -152,7 +152,7 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
       </div>
 
       {/* Message Count */}
-      <div style={{ textAlign: "right", flexShrink: 0, paddingRight: "12px" }}>
+      <div className="subscription-card-count" style={{ textAlign: "right", flexShrink: 0, paddingRight: "12px" }}>
         <div style={{ fontWeight: "800", color: "var(--text-primary)", fontSize: "16px" }}>
           {sub.messageCount.toLocaleString()}
         </div>
@@ -161,6 +161,7 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
 
       {/* Actions */}
       <div
+        className="subscription-card-actions"
         style={{ display: "flex", gap: "8px", flexShrink: 0 }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -402,7 +403,7 @@ export default function SubscriptionsPage() {
   const selectedSubs = subscriptions.filter((s) => selectedIds.has(s.id));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", padding: "32px 36px" }}>
+    <div className="app-page" style={{ display: "flex", flexDirection: "column", minHeight: "100%", padding: "32px 36px" }}>
       {/* Top Header & Metrics */}
       <div style={{ marginBottom: "28px" }}>
         <h1
@@ -609,7 +610,7 @@ export default function SubscriptionsPage() {
       {/* Floating Bulk Action Dock */}
       {selectedIds.size > 0 && (
         <div
-          className="animate-fade-in-scale"
+          className="bulk-action-dock animate-fade-in-scale"
           style={{
             position: "fixed",
             bottom: "28px",

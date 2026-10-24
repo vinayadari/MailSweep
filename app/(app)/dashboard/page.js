@@ -456,7 +456,7 @@ export default function DashboardPage() {
   const totalEmailsFromSubs = subs.reduce((acc, s) => acc + (s.messageCount || 0), 0);
 
   return (
-    <div style={{ padding: "32px 36px", maxWidth: "1280px", margin: "0 auto" }}>
+    <div className="app-page" style={{ padding: "32px 36px", maxWidth: "1280px", margin: "0 auto" }}>
       {/* Welcome Banner */}
       <div
         className="glass-card"

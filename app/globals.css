@@ -377,3 +377,159 @@ body {
   animation: progressStripes 1.2s linear infinite;
 }
 
+/* ===== Signed-in app responsive layout ===== */
+.app-mobile-bar,
+.app-drawer-scrim {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .app-layout {
+    display: block !important;
+    width: 100%;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .app-mobile-bar {
+    display: flex;
+    height: 60px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 40;
+  }
+
+  .app-menu-toggle {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .app-sidebar {
+    position: fixed !important;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw) !important;
+    height: 100dvh;
+    padding: 20px 0 !important;
+    overflow-y: auto;
+    transform: translateX(-105%);
+    transition: transform 200ms ease;
+    z-index: 60 !important;
+    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.45);
+  }
+
+  .app-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .app-drawer-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.62);
+    border: 0;
+    z-index: 55;
+  }
+
+  .app-main-column {
+    width: 100%;
+    min-width: 0;
+    height: calc(100dvh - 60px) !important;
+  }
+
+  .app-desktop-header {
+    display: none !important;
+  }
+
+  .app-main-viewport {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .app-page {
+    width: 100%;
+    min-width: 0;
+    padding: 20px 16px !important;
+  }
+
+  .app-page h1 {
+    font-size: 24px !important;
+  }
+
+  .app-page .glass-card {
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .app-page select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .subscription-card {
+    flex-wrap: wrap;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  .subscription-card-info {
+    flex: 1 1 calc(100% - 82px) !important;
+  }
+
+  .subscription-card-count {
+    margin-left: auto;
+    padding-right: 0 !important;
+  }
+
+  .subscription-card-actions {
+    flex: 1 0 100%;
+    justify-content: flex-end;
+  }
+
+  .bulk-action-dock {
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px !important;
+    right: 12px;
+    width: auto;
+    max-width: 520px;
+    margin: 0 auto;
+    transform: none !important;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-page {
+    padding: 16px 12px !important;
+  }
+
+  .app-page .glass-card {
+    padding: 15px !important;
+  }
+
+  .subscription-card-actions .btn {
+    flex: 1;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+

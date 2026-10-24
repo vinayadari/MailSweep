@@ -64,9 +64,33 @@ export function AppShell({ children }) {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--background)" }}>
+    <div className="app-layout" style={{ display: "flex", height: "100vh", overflow: "hidden", background: "var(--background)" }}>
+      <div className="app-mobile-bar">
+        <Link href="/dashboard" aria-label="MailSweep dashboard" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <MailSweepLogo size="sm" />
+        </Link>
+        <button
+          type="button"
+          className="app-menu-toggle"
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
       {/* Sidebar */}
       <aside
+        className={`app-sidebar${menuOpen ? " is-open" : ""}`}
         style={{
           width: "240px",
           flexShrink: 0,
@@ -149,6 +173,7 @@ export function AppShell({ children }) {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setMenuOpen(false)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -289,10 +314,13 @@ export function AppShell({ children }) {
         </div>
       </aside>
 
+      {menuOpen && <button className="app-drawer-scrim" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />}
+
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      <div className="app-main-column" style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
         {/* Top Header Bar */}
         <header
+          className="app-desktop-header"
           style={{
             height: "64px",
             borderBottom: "1px solid var(--border)",
@@ -336,6 +364,7 @@ export function AppShell({ children }) {
 
         {/* Page Content Viewport */}
         <main
+          className="app-main-viewport"
           style={{
             flex: 1,
             overflowY: "auto",

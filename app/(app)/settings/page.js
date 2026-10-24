@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   const user = await getCurrentUser();
 
   return (
-    <div style={{ padding: "32px 36px", maxWidth: "720px", margin: "0 auto" }}>
+    <div className="app-page" style={{ padding: "32px 36px", maxWidth: "720px", margin: "0 auto" }}>
       <div style={{ marginBottom: "28px" }}>
         <h1
           style={{
