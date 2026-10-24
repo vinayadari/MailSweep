@@ -1,8 +1,10 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { EvidenceReceiptModal } from "@/components/EvidenceReceiptModal";
+import { BulkBatchReportModal } from "@/components/BulkBatchReportModal";
 
 const SORT_OPTIONS = [
   { value: "messages", label: "Most emails" },
@@ -111,11 +113,25 @@ function SubscriptionCard({ sub, selected, onToggle, onUnsubscribe }) {
           <span className={`badge ${badgeInfo.badgeClass}`}>
             {badgeInfo.label}
           </span>
-          {sub.status === "UNSUBSCRIBED" && (
-            <span className="badge badge-emerald">✓ Unsubscribed</span>
+
+          {/* Evidence Verification Level Badges */}
+          {sub.verificationLevel === "REQUEST_ACCEPTED" && (
+            <span className="badge badge-indigo" title="Level 1: Request Accepted via HTTP 200">
+              ✓ L1: Accepted
+            </span>
+          )}
+          {sub.verificationLevel === "PENDING_VERIFICATION" && (
+            <span className="badge badge-amber" title="Level 2: Pending web or email confirmation">
+              ⏳ L2: Pending
+            </span>
+          )}
+          {sub.verificationLevel === "INDEPENDENTLY_VERIFIED" && (
+            <span className="badge badge-emerald" title="Level 3: Independently Verified">
+              🛡️ L3: Verified
+            </span>
           )}
           {sub.status === "KEPT" && (
-            <span className="badge badge-indigo">Kept</span>
+            <span className="badge badge-muted">Kept</span>
           )}
         </div>
 
@@ -201,7 +217,7 @@ function UnsubscribeModal({ targets, onClose, onConfirm, loading }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ fontSize: "32px", marginBottom: "12px" }}>🛑</div>
+        <div style={{ fontSize: "32px", marginBottom: "12px" }}>⚖️</div>
 
         <h3
           style={{
@@ -219,8 +235,8 @@ function UnsubscribeModal({ targets, onClose, onConfirm, loading }) {
 
         <p style={{ color: "var(--text-secondary)", fontSize: "13.5px", marginBottom: "20px", lineHeight: "1.6" }}>
           {isBulk && items.length > 1
-            ? "MailClean will trigger the fastest unsubscription method (1-Click RFC 8058 or web form) for all selected senders."
-            : "We will trigger the unsubscription process for this sender to remove your address from their list."}
+            ? "MailClean will validate destinations, execute RFC 8058 standard POST requests, and issue an evidence receipt for every sender."
+            : "We will validate the unsubscription endpoint, execute the standard RFC request, and issue a cryptographic evidence receipt."}
         </p>
 
         {/* Sender list for bulk */}
@@ -277,7 +293,7 @@ function UnsubscribeModal({ targets, onClose, onConfirm, loading }) {
               style={{ width: "16px", height: "16px", accentColor: "var(--rose)" }}
             />
             <span style={{ fontSize: "13px", color: "var(--text-primary)", fontWeight: "500" }}>
-              Also move all existing promotional emails to Trash (recommended)
+              Consent to move past marketing emails to Trash
             </span>
           </label>
         </div>
@@ -294,7 +310,7 @@ function UnsubscribeModal({ targets, onClose, onConfirm, loading }) {
             disabled={loading}
             style={{ borderRadius: "10px" }}
           >
-            {loading ? "Unsubscribing..." : "Confirm & Clean"}
+            {loading ? "Executing & Auditing..." : "Confirm & Issue Receipt"}
           </button>
         </div>
       </div>
@@ -310,6 +326,10 @@ export default function SubscriptionsPage() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [unsubscribeTarget, setUnsubscribeTarget] = useState(null);
 
+  // Evidence Modals
+  const [batchReport, setBatchReport] = useState(null);
+  const [singleReceipt, setSingleReceipt] = useState(null);
+
   // Query
   const { data, isLoading } = useQuery({
     queryKey: ["subscriptions", { sort, search, status: statusFilter }],
@@ -320,9 +340,8 @@ export default function SubscriptionsPage() {
   });
 
   const subscriptions = data?.subscriptions || [];
-  const totalCount = data?.totalCount || subscriptions.length;
 
-  // Bulk mutation
+  // Bulk / Single mutation
   const unsubMutation = useMutation({
     mutationFn: ({ ids, trashExisting }) =>
       fetch("/api/subscriptions/bulk-unsubscribe", {
@@ -330,11 +349,17 @@ export default function SubscriptionsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids, trashExisting }),
       }).then((r) => r.json()),
-    onSuccess: () => {
+    onSuccess: (result) => {
       setUnsubscribeTarget(null);
       setSelectedIds(new Set());
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["subscription"] });
+
+      if (result.receipts?.length === 1) {
+        setSingleReceipt(result.receipts[0]);
+      } else if (result.receipts?.length > 1) {
+        setBatchReport(result);
+      }
     },
   });
 
@@ -382,7 +407,7 @@ export default function SubscriptionsPage() {
           All Subscriptions
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-          Review detected senders, bulk unsubscribe, and purge past promotional emails
+          Evidence-driven unsubscription with cryptographic receipts and verification states
         </p>
       </div>
 
@@ -516,11 +541,6 @@ export default function SubscriptionsPage() {
             <p style={{ color: "var(--text-muted)", fontSize: "13.5px", maxWidth: "420px", margin: "0 auto 16px" }}>
               {search ? "Try clearing your search query." : "Run a deep scan from the Dashboard to detect subscriptions."}
             </p>
-            {search && (
-              <button className="btn btn-secondary btn-sm" onClick={() => setSearch("")}>
-                Clear Search
-              </button>
-            )}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -590,19 +610,39 @@ export default function SubscriptionsPage() {
               onClick={() => setUnsubscribeTarget(selectedSubs)}
               style={{ borderRadius: "10px" }}
             >
-              ⚡ Unsubscribe Selected
+              ⚡ Unsubscribe & Show Proof
             </button>
           </div>
         </div>
       )}
 
-      {/* Unsubscribe Modal */}
+      {/* Confirmation Modal */}
       {unsubscribeTarget && (
         <UnsubscribeModal
           targets={unsubscribeTarget}
           onClose={() => setUnsubscribeTarget(null)}
           onConfirm={handleConfirmUnsub}
           loading={unsubMutation.isPending}
+        />
+      )}
+
+      {/* Evidence Receipt Modal for Single Unsubscribe */}
+      {singleReceipt && (
+        <EvidenceReceiptModal
+          receipt={singleReceipt}
+          onClose={() => setSingleReceipt(null)}
+        />
+      )}
+
+      {/* Batch Audit Report Modal for Bulk Unsubscribe */}
+      {batchReport && (
+        <BulkBatchReportModal
+          report={batchReport}
+          onClose={() => setBatchReport(null)}
+          onRetryFailed={(failedIds) =>
+            unsubMutation.mutate({ ids: failedIds, trashExisting: false })
+          }
+          retrying={unsubMutation.isPending}
         />
       )}
     </div>

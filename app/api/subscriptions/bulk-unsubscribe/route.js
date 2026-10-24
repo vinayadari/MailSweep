@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getGmailClient, trashMessages, oneClickUnsubscribe } from "@/lib/gmail";
-import { UNSUBSCRIBE_TYPES } from "@/lib/subscription-detector";
+import { getGmailClient } from "@/lib/gmail";
+import { executeUnsubscribe, VERIFICATION_LEVELS } from "@/lib/unsubscribe-executor";
 
 export async function POST(request) {
   const user = await getCurrentUser();
@@ -19,48 +19,67 @@ export async function POST(request) {
     where: { id: { in: ids }, userId: user.userId },
   });
 
-  const gmail = getGmailClient(user.accessToken, user.refreshToken);
-  const results = [];
-
-  for (const sub of subscriptions) {
-    const result = {
-      id: sub.id,
-      senderName: sub.senderName || sub.senderEmail,
-      unsubscribeSuccess: false,
-      requiresManual: false,
-      manualUrl: null,
-      trashCount: 0,
-    };
-
+  let gmailClient = null;
+  if (trashExisting) {
     try {
-      if (sub.unsubscribeType === UNSUBSCRIBE_TYPES.ONE_CLICK && sub.unsubscribeUrl) {
-        result.unsubscribeSuccess = await oneClickUnsubscribe(sub.unsubscribeUrl);
-      } else if (
-        (sub.unsubscribeType === UNSUBSCRIBE_TYPES.URL ||
-          sub.unsubscribeType === UNSUBSCRIBE_TYPES.MAILTO) &&
-        sub.unsubscribeUrl
-      ) {
-        result.requiresManual = true;
-        result.manualUrl = sub.unsubscribeUrl;
-      }
-
-      if (trashExisting && sub.messageIds?.length) {
-        const r = await trashMessages(gmail, sub.messageIds);
-        result.trashCount = r.succeeded;
-      }
-
-      await prisma.subscription.update({
-        where: { id: sub.id },
-        data: { status: "UNSUBSCRIBED" },
-      });
+      gmailClient = getGmailClient(user.accessToken, user.refreshToken);
     } catch (err) {
-      result.error = err.message;
+      console.warn("Could not initialize Gmail client for bulk trash:", err.message);
     }
-
-    results.push(result);
   }
 
-  const completed = results.filter((r) => r.unsubscribeSuccess || r.requiresManual).length;
+  const receipts = [];
+  let acceptedCount = 0;
+  let pendingManualCount = 0;
+  let failedCount = 0;
+  let trashTotal = 0;
 
-  return NextResponse.json({ results, completed, total: results.length });
+  for (const sub of subscriptions) {
+    try {
+      const receipt = await executeUnsubscribe({
+        user,
+        subscription: sub,
+        trashExisting,
+        gmailClient,
+      });
+
+      if (receipt.verificationLevel === VERIFICATION_LEVELS.REQUEST_ACCEPTED) {
+        acceptedCount++;
+      } else if (receipt.verificationLevel === VERIFICATION_LEVELS.PENDING_VERIFICATION) {
+        pendingManualCount++;
+      } else {
+        failedCount++;
+      }
+
+      trashTotal += receipt.trashCount || 0;
+      receipts.push(receipt);
+    } catch (err) {
+      console.error(`Bulk unsubscribe failure for ${sub.senderEmail}:`, err);
+      failedCount++;
+      receipts.push({
+        subscriptionId: sub.id,
+        senderName: sub.senderName || sub.senderEmail,
+        senderEmail: sub.senderEmail,
+        status: "FAILED",
+        verificationLevel: VERIFICATION_LEVELS.FAILED,
+        verificationLabel: "Execution Error",
+        evidenceSummary: err.message,
+        whatThisProves: "An internal error occurred during request processing.",
+        requiresManual: true,
+        manualUrl: sub.unsubscribeUrl,
+      });
+    }
+  }
+
+  return NextResponse.json({
+    summary: {
+      total: receipts.length,
+      acceptedCount,
+      pendingManualCount,
+      failedCount,
+      trashTotal,
+      timestamp: new Date().toISOString(),
+    },
+    receipts,
+  });
 }

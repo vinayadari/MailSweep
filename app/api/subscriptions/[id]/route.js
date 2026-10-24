@@ -11,6 +11,12 @@ export async function GET(request, { params }) {
   const resolvedParams = await params;
   const sub = await prisma.subscription.findFirst({
     where: { id: resolvedParams.id, userId: user.userId },
+    include: {
+      attempts: {
+        orderBy: { attemptedAt: "desc" },
+        take: 10,
+      },
+    },
   });
 
   if (!sub) return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -22,6 +22,7 @@ model User {
   updatedAt       DateTime  @updatedAt
 
   subscriptions   Subscription[]
+  attempts        UnsubscribeAttempt[]
 }
 
 model Subscription {
@@ -45,14 +46,41 @@ model Subscription {
   // Store message IDs for trash operation (max ~500)
   messageIds      String[]  @default([])
 
-  status          String    @default("ACTIVE") // ACTIVE | UNSUBSCRIBED | KEPT
+  status          String    @default("ACTIVE") // ACTIVE | UNSUBSCRIBED | PENDING_VERIFICATION | KEPT
+  verificationLevel String? @default("NONE")     // NONE | REQUEST_ACCEPTED | PENDING_VERIFICATION | INDEPENDENTLY_VERIFIED | FAILED
+  lastAttemptAt   DateTime?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempts        UnsubscribeAttempt[]
 
   @@unique([userId, senderEmail])
   @@index([userId, status])
   @@index([userId, messageCount])
+}
+
+model UnsubscribeAttempt {
+  id                 String    @id @default(cuid())
+  userId             String
+  subscriptionId     String
+  method             String    // RFC_8058_ONE_CLICK | WEB_URL | MAILTO | NONE
+  status             String    // SUCCESS | FAILED | PENDING_MANUAL
+  verificationLevel  String    // REQUEST_ACCEPTED | PENDING_VERIFICATION | INDEPENDENTLY_VERIFIED | FAILED
+  httpStatus         Int?
+  destinationHost    String?   // Sanitized destination hostname only (e.g. "email.substack.com")
+  responseSummary    String?   // Sanitized short summary (e.g. "HTTP 200 OK")
+  consentGiven       Boolean   @default(true)
+  trashExecuted      Boolean   @default(false)
+  trashCount         Int       @default(0)
+  attemptedAt        DateTime  @default(now())
+  completedAt        DateTime?
+  errorCode          String?
+
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription       Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, attemptedAt])
+  @@index([subscriptionId, attemptedAt])
 }
