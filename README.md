@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📧 MailClean — Gmail Subscription Manager
 
-## Getting Started
+A modern, fast, and privacy-focused web application to connect your Gmail, automatically detect subscription senders and newsletters, browse them, inspect recent emails, unsubscribe in 1-click, and optionally batch trash existing promotional emails.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+- **🔐 Google OAuth 2.0**: Minimal readonly metadata and modify scopes (`gmail.readonly`, `gmail.modify`). Zero storage of email bodies.
+- **⚡ Background Scanner**: Intelligent inbox scanner that fetches message headers in chunks and groups emails by sender.
+- **🎯 RFC 2369 & RFC 8058 Detection**: Automatically parses `List-Unsubscribe` and `List-Unsubscribe-Post` headers to provide:
+  - **1-Click Unsubscribe**: Automatic HTTP POST request compliant with modern newsletter standards.
+  - **URL Unsubscribe**: Direct web link to the sender's unsubscription page.
+  - **Mailto Fallback**: Direct email unsubscription link.
+- **📊 Real-time Dashboard**:
+  - Live statistics: Active subscriptions, total emails scanned, unsubscription rate, cleanup metrics.
+  - Configurable scan range: 1 month, 3 months, 6 months, 1 year, or all time.
+  - Interactive progress indicator during active scans.
+- **📋 Subscriptions Manager**:
+  - Bulk select & bulk unsubscribe with floating action bar.
+  - Filter by Active, Unsubscribed, or Kept.
+  - Search by sender name or email address.
+  - Sort by email frequency, newest, oldest, or alphabetically.
+- **🔍 Subscription Detail Inspector**:
+  - Inspect sender frequency, first and last email dates, and detection confidence.
+  - View snippets and subjects of recent emails from this sender.
+  - "Keep Receiving" action to whitelist trusted senders.
+  - Unsubscribe modal with optional "Move all existing emails from this sender to Trash" checkbox.
+- **⚙️ Settings & Privacy**:
+  - View authenticated profile.
+  - Transparency overview of stored metadata.
+  - Session termination and logout.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router, React 19)
+- **Database**: PostgreSQL on [Neon](https://neon.tech/)
+- **ORM**: [Prisma v6](https://www.prisma.io/)
+- **Styling**: Vanilla CSS design tokens with curated obsidian dark mode
+- **State & Caching**: TanStack React Query v5
+- **APIs**: Google APIs (`googleapis`), Google OAuth 2.0
+
+---
+
+## 🏁 Getting Started
+
+### 1. Prerequisites
+
+- Node.js 18+ installed
+- PostgreSQL database (Neon or local)
+- Google Cloud project with Gmail API enabled and OAuth 2.0 credentials
+
+### 2. Environment Setup
+
+Create a `.env` file in the root directory (based on `.env.example`):
+
+```env
+DATABASE_URL="postgresql://username:password@host/neondb?sslmode=require"
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### 3. Google Cloud Console Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the **Gmail API**.
+3. Create an **OAuth 2.0 Client ID** (Web application).
+4. Add the following **Authorized Redirect URI**:
+   ```
+   http://localhost:3000/api/auth/callback/google
+   ```
+5. Ensure scopes include:
+   - `openid`
+   - `https://www.googleapis.com/auth/userinfo.email`
+   - `https://www.googleapis.com/auth/userinfo.profile`
+   - `https://www.googleapis.com/auth/gmail.readonly`
+   - `https://www.googleapis.com/auth/gmail.modify`
+
+### 4. Install Dependencies & Migrate Database
+
+```bash
+npm install
+npx prisma generate
+npx prisma migrate dev
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) to view MailClean.
