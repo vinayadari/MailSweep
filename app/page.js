@@ -31,7 +31,7 @@ export default async function HomePage() {
   if (user) redirect("/dashboard");
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--background)", position: "relative", overflow: "hidden" }}>
+    <div className="landing-page" style={{ minHeight: "100vh", background: "var(--background)", position: "relative", overflow: "hidden" }}>
       {/* Ambient glows */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
@@ -50,12 +50,12 @@ export default async function HomePage() {
         background: "rgba(7,8,12,0.78)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "15px 28px",
+        <div className="landing-nav-inner" style={{ maxWidth: "1200px", margin: "0 auto", padding: "15px 28px",
           display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ textDecoration: "none" }}>
-            <MailSweepLogo size="md" />
+            <MailSweepLogo size="sm" />
           </Link>
-          <nav style={{ display: "flex", alignItems: "center", gap: "32px" }}>
+          <nav className="landing-nav-links" style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             {["Features", "How it Works", "Pricing", "FAQs"].map((label) => (
               <a key={label}
                 href={"#" + label.toLowerCase().replace(/\s+/g, "-")}
@@ -64,13 +64,13 @@ export default async function HomePage() {
               </a>
             ))}
           </nav>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Link href="/login" style={{
+          <div className="landing-nav-actions" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Link className="landing-nav-signin" href="/login" style={{
               color: "var(--text-secondary)", fontSize: "14px", fontWeight: "600",
               textDecoration: "none", padding: "8px 18px", borderRadius: "10px",
               border: "1px solid rgba(255,255,255,0.1)",
             }}>Sign In</Link>
-            <Link href="/login" style={{
+            <Link className="landing-nav-connect" href="/login" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "9px 20px", borderRadius: "10px",
               background: "white", color: "#1e293b",
@@ -85,7 +85,7 @@ export default async function HomePage() {
       </header>
 
       {/* HERO — Two Columns */}
-      <section id="features" style={{
+      <section id="features" className="landing-hero" style={{
         maxWidth: "1200px", margin: "0 auto",
         padding: "80px 28px 60px",
         display: "grid", gridTemplateColumns: "1fr 1fr",
@@ -180,7 +180,7 @@ export default async function HomePage() {
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         position: "relative", zIndex: 1,
       }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto",
+        <div className="landing-feature-grid" style={{ maxWidth: "1200px", margin: "0 auto",
           display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
           {[
             {
@@ -199,7 +199,7 @@ export default async function HomePage() {
               title: "Inbox Cleanup", desc: "Move existing emails to trash with a single click.",
             },
           ].map((item, idx) => (
-            <div key={idx} style={{ padding: "36px 32px", display: "flex", alignItems: "center", gap: "20px",
+            <div key={idx} className="landing-feature-item" style={{ padding: "36px 32px", display: "flex", alignItems: "center", gap: "20px",
               borderRight: idx < 2 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
               <div style={{ width: "52px", height: "52px", flexShrink: 0, borderRadius: "14px",
                 background: item.iconBg, color: item.iconColor,
@@ -220,11 +220,11 @@ export default async function HomePage() {
       </section>
 
       {/* REST OF PAGE */}
-      <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 28px 80px", position: "relative", zIndex: 1 }}>
+      <main className="landing-main" style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 28px 80px", position: "relative", zIndex: 1 }}>
         <InteractiveDemo />
         <CoreValueDrivers />
 
-        <section style={{ marginTop: "100px" }} id="pricing">
+        <section className="landing-pricing" style={{ marginTop: "100px" }} id="pricing">
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             <div style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase",
               letterSpacing: "1.2px", color: "var(--accent-light)", marginBottom: "10px" }}>
@@ -238,13 +238,13 @@ export default async function HomePage() {
               Clean your mailbox quickly without complicated rules or manual unsubscribe links.
             </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+          <div className="landing-step-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
             {[
               { step: "01", title: "Connect Gmail in 1-Click", desc: "Secure Google OAuth connection using minimal necessary permissions to inspect header metadata.", icon: "🔐" },
               { step: "02", title: "Intelligent Scanner", desc: "Detects List-Unsubscribe headers, mailto hooks, and recurring newsletters across your inbox.", icon: "⚡" },
               { step: "03", title: "1-Click Bulk Unsubscribe", desc: "Select unwanted senders and unsubscribe in batch. Optionally send past marketing emails straight to Trash.", icon: "✨" },
             ].map((card, i) => (
-              <div key={i} className="card" style={{ padding: "32px", borderRadius: "16px",
+              <div key={i} className="card landing-step-card" style={{ padding: "32px", borderRadius: "16px",
                 background: "var(--surface)", position: "relative", border: "1px solid var(--border)" }}>
                 <div style={{ fontSize: "36px", fontWeight: "900", color: "rgba(99,102,241,0.2)", marginBottom: "16px" }}>{card.step}</div>
                 <div style={{ fontSize: "28px", marginBottom: "16px" }}>{card.icon}</div>
@@ -259,7 +259,7 @@ export default async function HomePage() {
         <TestimonialsSection />
         <section id="faqs"><FaqAccordion /></section>
 
-        <section style={{ marginTop: "60px", padding: "48px 40px", borderRadius: "24px",
+        <section className="landing-final-cta" style={{ marginTop: "60px", padding: "48px 40px", borderRadius: "24px",
           background: "linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(14,17,26,0.95) 100%)",
           border: "1px solid rgba(99,102,241,0.35)",
           boxShadow: "0 20px 60px -10px rgba(99,102,241,0.2)",

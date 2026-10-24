@@ -76,6 +76,7 @@ export default function TestimonialsSection() {
 
       {/* Metric Highlights Banner */}
       <div
+        className="responsive-metric-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -122,6 +123,7 @@ export default function TestimonialsSection() {
 
       {/* Reviews Cards */}
       <div
+        className="responsive-card-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",

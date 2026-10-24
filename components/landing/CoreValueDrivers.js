@@ -103,6 +103,7 @@ export default function CoreValueDrivers() {
       </div>
 
       <div
+        className="responsive-card-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",

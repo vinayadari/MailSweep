@@ -81,6 +81,7 @@ export default function PrivacyMatrix() {
 
       {/* Comparison Grid */}
       <div
+        className="responsive-card-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",

@@ -61,9 +61,9 @@ export default function HeroVisual() {
   const strokeDash = circ - (progress / 100) * circ;
 
   return (
-    <div style={{ position: "relative", width: "100%", maxWidth: "480px", margin: "0 auto" }}>
+    <div className="landing-hero-visual" style={{ position: "relative", width: "100%", maxWidth: "480px", margin: "0 auto" }}>
       {/* Glass panel */}
-      <div style={{
+      <div className="landing-hero-panel" style={{
         borderRadius: "24px",
         background: "linear-gradient(145deg, rgba(20,24,38,0.9) 0%, rgba(12,14,22,0.95) 100%)",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -95,14 +95,14 @@ export default function HeroVisual() {
         </div>
 
         {/* Scan progress area */}
-        <div style={{
+        <div className="landing-hero-summary" style={{
           background: "rgba(255,255,255,0.03)", borderRadius: "16px",
           padding: "20px", marginBottom: "20px",
           border: "1px solid rgba(255,255,255,0.06)",
           display: "flex", alignItems: "center", gap: "20px",
         }}>
           {/* Ring */}
-          <div style={{ position: "relative", flexShrink: 0, width: "120px", height: "120px" }}>
+          <div className="landing-hero-ring" style={{ position: "relative", flexShrink: 0, width: "120px", height: "120px" }}>
             <svg width="120" height="120" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
               <circle

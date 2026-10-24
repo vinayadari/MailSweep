@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import MailSweepLogo from "@/components/MailSweepLogo";
 
@@ -51,6 +51,15 @@ export function AppShell({ children }) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
 
   const { data: user } = useQuery({
     queryKey: ["me"],
@@ -106,6 +115,7 @@ export function AppShell({ children }) {
         <div style={{ padding: "0 20px 24px" }}>
           <Link
             href="/dashboard"
+            onClick={() => setMenuOpen(false)}
             style={{
               display: "flex",
               alignItems: "center",

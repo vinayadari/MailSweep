@@ -17,8 +17,8 @@ export default async function LoginPage({ searchParams }) {
 
   return (
     <div
-      className="min-h-screen relative flex items-center justify-center p-4 sm:p-8 overflow-hidden bg-mesh"
-      style={{ background: "var(--background)" }}
+      className="login-page min-h-screen relative flex items-center justify-center p-4 sm:p-8 bg-mesh"
+      style={{ background: "var(--background)", minHeight: "100svh", overflowX: "hidden" }}
     >
       {/* Background radial glow orbs */}
       <div
@@ -60,10 +60,11 @@ export default async function LoginPage({ searchParams }) {
 
       {/* Main Container */}
       <div
-        className="relative z-10 w-full max-w-5xl animate-fade-in-scale"
+        className="login-shell relative z-10 w-full max-w-5xl animate-fade-in-scale"
         style={{ margin: "auto" }}
       >
         <div
+          className="login-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
@@ -72,7 +73,7 @@ export default async function LoginPage({ searchParams }) {
           }}
         >
           {/* Left Column: Visual Showcase & Value Prop */}
-          <div style={{ padding: "16px 24px" }}>
+          <div className="login-showcase" style={{ padding: "16px 24px" }}>
             {/* Brand Logo */}
             <div style={{ marginBottom: "28px" }}>
               <Link href="/" style={{ textDecoration: "none" }}>
@@ -244,9 +245,9 @@ export default async function LoginPage({ searchParams }) {
           </div>
 
           {/* Right Column: High-Conversion Login Card */}
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div className="login-card-wrap" style={{ display: "flex", justifyContent: "center" }}>
             <div
-              className="glass-card"
+              className="glass-card login-card"
               style={{
                 width: "100%",
                 maxWidth: "440px",
