@@ -4,12 +4,13 @@ import { getOAuthClient } from "@/lib/gmail";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { encryptToken } from "@/lib/token-crypto";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
-  const app = process.env.NEXT_PUBLIC_APP_URL;
+  const app = getAppBaseUrl();
 
   const cookieStore = await cookies();
   const expectedState = cookieStore.get("oauth_state")?.value;

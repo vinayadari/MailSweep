@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clearSession } from "@/lib/auth";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 export async function POST(request) {
   await clearSession();
@@ -8,7 +9,7 @@ export async function POST(request) {
   const isFormSubmit = accept.includes("text/html");
 
   if (isFormSubmit) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = getAppBaseUrl();
     return NextResponse.redirect(new URL("/login", baseUrl), 303);
   }
 
